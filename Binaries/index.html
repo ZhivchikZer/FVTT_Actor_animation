@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Animator — MP4 → WebM</title>
+  <meta name="description" content="Конвертер MP4 в WebM с круговой маской и ping-pong анимацией для VTT токенов">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <header class="header">
+      <div class="logo">
+        <div class="logo-hex">◈</div>
+        <div class="logo-name">Token<span>Animator</span></div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="lang-switch" style="display: flex; gap: 6px;">
+          <button id="btnLangRu" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://flagcdn.com/w40/ru.png'); background-size: cover; background-position: center; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; cursor:pointer; font-size: 0.85rem; font-weight: 700; padding: 4px 12px; transition: 0.2s; text-shadow: 0 1px 3px rgba(0,0,0,0.8);" title="Русский">RU</button>
+          <button id="btnLangEn" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://flagcdn.com/w40/gb.png'); background-size: cover; background-position: center; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; cursor:pointer; font-size: 0.85rem; font-weight: 700; padding: 4px 12px; transition: 0.2s; text-shadow: 0 1px 3px rgba(0,0,0,0.8);" title="English">EN</button>
+        </div>
+        <div class="status-badge" id="statusBadge">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText" data-i18n="statusInit">Инициализация...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Социальные ссылки ── -->
+    <div class="social-banner" style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 24px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; font-size: 0.85rem; color: #aaa;">
+      <div style="flex: 1; text-align: right; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 24px;">
+        <a href="https://discord.gg/vCU9BaF6aU" target="_blank" style="color: #7289da; text-decoration: none; font-weight: 600; display: block; margin-bottom: 6px; font-size: 1rem;" data-i18n="linkDiscord">💬 Мой Discord</a>
+        <span data-i18n="linkDiscordDesc">— тут я обитаю, и там есть реквизиты для донатов!</span>
+      </div>
+      <div style="flex: 1; text-align: left; padding-left: 0;">
+        <a href="https://boosty.to/zhivchik" target="_blank" style="color: #f15f2c; text-decoration: none; font-weight: 600; display: block; margin-bottom: 6px; font-size: 1rem;" data-i18n="linkBoosty">🔥 Boosty</a>
+        <span data-i18n="linkBoostyDesc">— разрабатываю революционную игру в жанре НРИ для FVTT (Vasyan-Zone)</span>
+      </div>
+    </div>
+
+    <main class="steps">
+
+      <!-- ── Шаг 0: Подготовка ── -->
+      <section class="card" id="card0" style="margin-bottom: 24px;">
+        <header class="card-header" id="card0Header" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span class="step-num">00</span>
+            <span class="step-title" data-i18n="step0Title">Подготовка материала</span>
+          </div>
+          <span id="card0ToggleIcon" style="font-size: 1.2rem; color: rgba(255,255,255,0.3); transition: transform 0.3s; transform: rotate(180deg);">▲</span>
+        </header>
+        
+        <div id="card0Content" style="transition: max-height 0.4s ease-in-out; overflow: hidden; max-height: 2000px;">
+          <div class="info-block" style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; font-size: 0.9rem; color: #ddd; line-height: 1.5;">
+            <p style="margin-bottom: 12px;"><span data-i18n="step0Desc1">Найди или сгенерируй картинку своего персонажа в</span> <a href="https://www.bing.com/images/create" target="_blank" style="color: #3dd6f5;">BingAI</a> (<span data-i18n="step0Desc1_2">я пользуюсь NanoBanana</span>) <span data-i18n="step0Desc1_3">или любой другой приятной нейросети.</span></p>
+            
+            <p style="margin-bottom: 12px;"><span data-i18n="step0Desc2">Затем анимируй эту картинку в</span> <a href="https://klingai.com/" target="_blank" style="color: #3dd6f5;">Kling AI</a> (<span data-i18n="step0Desc2_2">или Google Veo 3.1</span>).</p>
+            
+            <p style="margin-bottom: 6px;" data-i18n="step0PromptTitle">Используй этот промпт:</p>
+            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 6px; border-left: 3px solid #7c6eef; font-family: monospace; font-size: 0.85rem;" data-i18n="step0Prompt">Сделай чтобы персонаж чуть двигался и моргал, это его idle-анимация в игре и важно чтобы глаза НЕ меняли цвет и чтобы персонаж НЕ открывал рта.</div>
+          </div>
+
+          <div style="text-align: center; margin: 32px 0; position: relative;">
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; position: absolute; top: 50%; left: 0; transform: translateY(-50%); z-index: 0;">
+            <span style="background: #1a1a24; padding: 0 16px; color: #aaa; font-size: 0.85rem; position: relative; z-index: 1;">ИЛИ (БЕЗ ИИ) НАСТРОЙКА ГОТОВОГО ВИДЕО</span>
+          </div>
+
+          <div style="padding: 16px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+            <p style="margin-bottom: 12px; font-size: 0.95rem; color: #ccc; text-align: center;">Если у тебя уже есть видео, выбери его, чтобы вырезать нужный фрагмент (желательно от 4 до 8 секунд). Так можно играть вообще за кого угодно, если подловить момент в сцене/игре/аниме.</p>
+            <div style="text-align: center; margin-bottom: 16px;">
+              <button class="btn-primary" id="btnSelectTrimVideo" style="font-size: 0.9rem; padding: 8px 16px;">📂 Выбрать видео для обрезки</button>
+              <input type="file" id="trimInput" accept="video/*" hidden>
+            </div>
+
+            <!-- UI Нарезки (скрыт по умолчанию) -->
+            <div id="trimUI" class="hidden">
+              <div style="position: relative; border-radius: 8px; overflow: hidden; background: #000; display: flex; justify-content: center; margin-bottom: 12px;">
+                <video id="trimVid" controls style="max-width: 100%; max-height: 300px; display: block;"></video>
+              </div>
+              
+              <div style="display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 16px;">
+                <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; text-align: center;">
+                  <div style="font-size: 0.75rem; color: #aaa; margin-bottom: 6px;">Начало отрезка</div>
+                  <div id="trimStartLabel" style="font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 8px;">0.00 с</div>
+                  <input type="range" class="range-input" id="trimStartRange" min="0" max="100" step="0.01" value="0" style="margin-bottom: 8px; width: 100%;">
+                  <button id="btnSetTrimStart" class="tab-btn" style="width: 100%; padding: 6px; font-size: 0.8rem;">📍 Задать начало</button>
+                </div>
+                
+                <div style="font-size: 1.5rem; color: rgba(255,255,255,0.2);">→</div>
+                
+                <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; text-align: center;">
+                  <div style="font-size: 0.75rem; color: #aaa; margin-bottom: 6px;">Конец отрезка</div>
+                  <div id="trimEndLabel" style="font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 8px;">0.00 с</div>
+                  <input type="range" class="range-input" id="trimEndRange" min="0" max="100" step="0.01" value="0" style="margin-bottom: 8px; width: 100%;">
+                  <button id="btnSetTrimEnd" class="tab-btn" style="width: 100%; padding: 6px; font-size: 0.8rem;">📍 Задать конец</button>
+                </div>
+              </div>
+
+              <div style="text-align: center; color: #3dd6f5; font-size: 0.85rem; margin-bottom: 16px;" id="trimDurationLabel">Длительность: 0.00 с</div>
+
+              <button class="btn-primary" id="btnDoTrim" style="width: 100%; justify-content: center; background: #28a745; padding: 16px; font-size: 1.2rem; border-radius: 12px; font-weight: bold; margin-top: 8px;">
+                <span style="margin-right: 8px;">✂️</span> Вырезать и использовать
+              </button>
+              
+              <!-- Прогресс обрезки -->
+              <div id="trimProgressBlock" class="hidden" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 16px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.9rem; font-weight: bold; color: #fff; margin-bottom: 8px;" id="trimProgressText">Обрезка видео (FFmpeg)...</div>
+                <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                  <div id="trimProgressFill" style="height: 100%; width: 0%; background: #3dd6f5; transition: width 0.2s;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Шаг 1: Загрузка ── -->
+      <section class="card" id="card1">
+        <header class="card-header">
+          <span class="step-num">01</span>
+          <span class="step-title" data-i18n="step1Title">Загрузка видео</span>
+        </header>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dz-icon">🎬</div>
+          <p class="dz-main" data-i18n="dzMain">Перетащите MP4 файл сюда</p>
+          <p class="dz-sub" data-i18n="dzSub">или нажмите для выбора</p>
+          <input type="file" id="fileInput" accept="video/*" hidden>
+        </div>
+
+        <div class="file-bar hidden" id="fileBar">
+          <span class="file-bar-icon">🎞️</span>
+          <div class="file-bar-info">
+            <span class="file-bar-name" id="fileBarName"></span>
+            <span class="file-bar-size" id="fileBarSize"></span>
+          </div>
+          <button class="btn-sm" id="btnChangeFile" data-i18n="btnChange">Сменить</button>
+        </div>
+      </section>
+
+      <!-- ── Шаг 2: Кадрирование ── -->
+      <section class="card hidden" id="card2">
+        <header class="card-header">
+          <span class="step-num">02</span>
+          <span class="step-title" data-i18n="step2Title">Кадрирование 1×1</span>
+        </header>
+
+        <div class="crop-layout" style="flex-direction: column; align-items: center; gap: 24px;">
+          <div class="video-area" style="width: 100%; max-width: 600px;">
+            <div class="video-wrap" id="videoWrap">
+              <video id="vid" muted loop playsinline autoplay></video>
+              <canvas id="cropCanvas"></canvas>
+            </div>
+            <p class="hint-text" style="text-align: center;">💡 <span id="modeHintText" data-i18n="hintDrag">Тяни рамку чтобы позиционировать персонажа</span></p>
+          </div>
+
+          <!-- Preview Area -->
+          <div class="preview-area" style="margin-top: 0; width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center;">
+            <p class="preview-label" style="text-align: center; margin-bottom: 12px;" data-i18n="previewLabel">Итоговый токен</p>
+            <div class="preview-holder" style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px;">
+              <canvas id="previewCanvas" width="180" height="180"></canvas>
+            </div>
+          </div>
+
+          <div class="editor-controls" style="width: 100%; max-width: 600px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px;">
+            <!-- Tabs -->
+            <div class="editor-tabs" style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+              <button id="tabVideo" class="tab-btn active" style="flex: 1; padding: 8px; border: none; background: rgba(124,110,239,0.3); color: #fff; border-radius: 6px; cursor: pointer; transition: 0.2s;" data-i18n="tabVideo">🎥 Видео и Фон</button>
+              <button id="tabFrame" class="tab-btn" style="flex: 1; padding: 8px; border: none; background: transparent; color: #aaa; border-radius: 6px; cursor: pointer; transition: 0.2s;" data-i18n="tabFrame">🖼️ Рамка</button>
+              <button id="tabBrush" class="tab-btn" style="flex: 1; padding: 8px; border: none; background: transparent; color: #aaa; border-radius: 6px; cursor: pointer; transition: 0.2s;" data-i18n="tabBrush">🖌️ Кисть (Маска)</button>
+            </div>
+
+            <!-- Panel: Video -->
+            <div id="panelVideo" class="tab-panel">
+              <div class="size-control">
+                <div class="size-label-row">
+                  <span data-i18n="scaleVideo">Масштаб видео</span>
+                  <span id="sizeValLabel">100%</span>
+                </div>
+                <input type="range" class="range-input" id="cropSizeRange" min="20" max="150" value="100">
+                
+                <!-- Background controls -->
+                <div id="bgControls" class="hidden" style="margin-top: 15px; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                  <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <span data-i18n="bgColor">Цвет пустого фона</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <input type="checkbox" id="bgTransparentCheck" checked title="Прозрачный фон">
+                      <span data-i18n="bgAlpha">Альфа</span>
+                      <input type="color" id="bgColorPicker" value="#000000" title="Цвет">
+                    </div>
+                  </label>
+                </div>
+                
+                <div class="setting-row" style="margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                  <div class="setting-info">
+                    <span class="setting-name" data-i18n="sizeTitle">Размер токена</span>
+                    <span class="setting-desc" data-i18n="sizeDesc">Разрешение выходного файла</span>
+                  </div>
+                  <select id="outSizeSelect" class="select-box">
+                    <option value="256">256 × 256</option>
+                    <option value="512" selected>512 × 512</option>
+                    <option value="1024">1024 × 1024</option>
+                  </select>
+                </div>
+
+                <div class="setting-row" style="margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                  <div class="setting-info">
+                    <span class="setting-name" data-i18n="maskTitle">Маска</span>
+                    <span class="setting-desc" data-i18n="maskDesc">Форма обрезки краев видео</span>
+                  </div>
+                  <select id="maskSelect" class="select-box">
+                    <option value="none" data-i18n="maskNone">Нет</option>
+                    <option value="circle" selected data-i18n="maskCircle">Круг</option>
+                    <option value="square" data-i18n="maskSquare">Квадрат</option>
+                    <option value="roundedSquare" data-i18n="maskRoundedSquare">Скругленный квадрат</option>
+                    <option value="hexagon" data-i18n="maskHexagon">Шестиугольник</option>
+                    <option value="octagon" data-i18n="maskOctagon">Восьмиугольник</option>
+                    <option value="diamond" data-i18n="maskDiamond">Ромб</option>
+                    <option value="triangle" data-i18n="maskTriangle">Треугольник</option>
+                    <option value="star" data-i18n="maskStar">Звезда</option>
+                    <option value="rect9x16" data-i18n="mask916">Прямоугольник 9:16</option>
+                    <option value="rect16x9" data-i18n="mask169">Прямоугольник 16:9</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel: Frame -->
+            <div id="panelFrame" class="tab-panel hidden">
+              <div class="frame-control" id="frameDropzone" style="padding: 10px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; transition: 0.2s;">
+                <div class="setting-row" style="margin-bottom: 8px; padding: 0;">
+                  <div class="setting-info">
+                    <span class="setting-name" style="font-size: 0.9rem;" data-i18n="frameTitle">Декоративная рамка</span>
+                    <span class="setting-desc" style="font-size: 0.75rem;" data-i18n="frameDesc">Лежит поверх всех масок</span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+                  <button id="btnLoadFrame" class="btn-sm" style="flex: 1;" data-i18n="btnLoadFrame">Свой PNG</button>
+                  <button id="btnDefaultFrames" class="btn-sm" style="flex: 1; background: #28a745;" data-i18n="btnDefaultFrames">🗂 Каталог рамок</button>
+                  <input type="file" id="frameInput" accept="image/png" hidden="">
+                  <button id="btnRemoveFrame" class="btn-sm hidden" style="background: rgba(255,0,0,0.3); color: white;" data-i18n="btnRemoveFrame">✕ Удалить</button>
+                </div>
+                <span id="frameNameLabel" style="font-size: 0.75rem; color: #aaa; display: block; margin-top: 8px; text-align: center;" data-i18n="noFrame">Нет рамки</span>
+              </div>
+              
+              <div id="frameTransformControls" class="hidden" style="margin-top: 15px;">
+                <div class="size-label-row">
+                  <span data-i18n="scaleFrame">Масштаб рамки</span>
+                  <span id="frameScaleLabel">100%</span>
+                </div>
+                <input type="range" class="range-input" id="frameScaleRange" min="20" max="200" value="100">
+                <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px; cursor: pointer; font-size: 0.85rem; color: #ccc;">
+                  <input type="checkbox" id="frameLockRatioCheck" checked>
+                  <span data-i18n="frameLockRatio">Сохранять пропорции (1:1)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Panel: Brush -->
+            <div id="panelBrush" class="tab-panel hidden">
+              <div id="brushSettings">
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                  <button id="btnBrushErase" class="btn-sm" style="flex: 1; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid #fff;" data-i18n="btnBrushErase">Удалить (Ластик)</button>
+                  <button id="btnBrushRestore" class="btn-sm" style="flex: 1; background: rgba(255,0,0,0.3); color: #fff; border: 1px solid transparent;" data-i18n="btnBrushRestore">Вернуть (Кисть)</button>
+                </div>
+                
+                <div class="size-label-row" style="font-size: 0.8rem;">
+                  <span data-i18n="brushSize">Размер</span>
+                  <span id="brushSizeLabel">20</span>
+                </div>
+                <input type="range" class="range-input" id="brushSizeRange" min="5" max="100" value="20" style="margin-bottom: 12px;">
+
+                <div class="size-label-row" style="font-size: 0.8rem;">
+                  <span data-i18n="brushOpacity">Нажим (Непрозрачность)</span>
+                  <span id="brushOpacityLabel">100%</span>
+                </div>
+                <input type="range" class="range-input" id="brushOpacityRange" min="1" max="100" value="100" style="margin-bottom: 15px;">
+
+                <button id="btnBrushClear" class="btn-sm" style="width: 100%; background: #444; transition: 0.2s;" data-i18n="btnBrushClear">Очистить все нарисованные маски</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Шаг 3: Настройки ── -->
+      <section class="card hidden" id="card3">
+        <header class="card-header">
+          <span class="step-num">03</span>
+          <span class="step-title" data-i18n="step3Title">Настройки</span>
+        </header>
+
+        <div class="settings-list">
+
+          <label class="setting-row" for="audioCheck">
+            <div class="setting-info">
+              <span class="setting-name" data-i18n="audioTitle">Без звука</span>
+              <span class="setting-desc" data-i18n="audioDesc">Вырезать аудио (уменьшает вес и улучшает производительность)</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="audioCheck" checked>
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </div>
+          </label>
+
+          <label class="setting-row" for="pingPongCheck">
+            <div class="setting-info">
+              <span class="setting-name" data-i18n="pingTitle">Ping-pong (плавная петля)</span>
+              <span class="setting-desc" data-i18n="pingDesc">Оригинал + реверс = бесшовная анимация</span>
+            </div>
+            <div class="toggle-wrap">
+              <input type="checkbox" id="pingPongCheck" checked>
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </div>
+          </label>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-name" data-i18n="speedTitle">Скорость</span>
+              <span class="setting-desc" data-i18n="speedDesc">Множитель скорости видео</span>
+            </div>
+            <select id="speedSelect" class="select-box">
+              <option value="0.25">0.25x (Очень медленно)</option>
+              <option value="0.5">0.5x (Медленно)</option>
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x (Оригинал)</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="2">2x (Быстро)</option>
+              <option value="3">3x (Очень быстро)</option>
+            </select>
+          </div>
+
+
+
+        </div>
+      </section>
+
+      <!-- ── Шаг 4: Экспорт ── -->
+      <section class="card hidden" id="card4">
+        <header class="card-header">
+          <span class="step-num">04</span>
+          <span class="step-title" data-i18n="step4Title">Экспорт</span>
+        </header>
+
+        <div class="export-settings" style="margin-bottom: 20px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+          <!-- Format Toggle -->
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button id="btnFormatWebm" class="tab-btn active" style="flex: 1; padding: 10px; border: none; background: rgba(124,110,239,0.3); color: #fff; border-radius: 8px; cursor: pointer; transition: 0.2s;">
+              <div style="font-weight: 600;">WebM</div>
+              <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-top: 4px;" data-i18n="formatWebmDesc">Для токена на карте</div>
+            </button>
+            <button id="btnFormatGif" class="tab-btn" style="flex: 1; padding: 10px; border: none; background: transparent; color: #aaa; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s;">
+              <div style="font-weight: 600;">GIF</div>
+              <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 4px;" data-i18n="formatGifDesc">Для арта в листе персонажа</div>
+            </button>
+          </div>
+
+          <!-- Advanced Settings -->
+          <div class="size-control" style="margin-bottom: 12px;">
+            <div class="size-label-row">
+              <span data-i18n="fpsLabel">Кадров в секунду (FPS)</span>
+              <span id="fpsValLabel">30</span>
+            </div>
+            <input type="range" class="range-input" id="fpsRange" min="10" max="60" step="5" value="30">
+          </div>
+
+          <div class="setting-row" style="padding: 10px 14px; margin-bottom: 16px; background: rgba(255,255,255,0.02);">
+            <div class="setting-info">
+              <span class="setting-name" style="font-size: 0.85rem;" data-i18n="qualityTitle">Качество</span>
+            </div>
+            <select id="qualitySelect" class="select-box" style="padding: 4px 8px; font-size: 0.8rem;">
+              <option value="low" data-i18n="qLow">Низкое</option>
+              <option value="medium" selected data-i18n="qMedium">Среднее</option>
+              <option value="high" data-i18n="qHigh">Высокое</option>
+              <option value="ultra" data-i18n="qUltra">Ультра</option>
+            </select>
+          </div>
+
+          <!-- File Size Estimate -->
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <span style="font-size: 0.85rem; color: #aaa;" data-i18n="fileWeight">Примерный вес:</span>
+            <span id="fileSizeEstimate" style="font-size: 0.95rem; font-weight: 600; color: #3dd6f5;">~1.5 MB</span>
+          </div>
+        </div>
+
+        <button class="btn-export" id="btnExport" disabled>
+          <span class="btn-export-icon">⚡</span>
+          <span id="btnExportText" data-i18n="btnExportWebm">Создать WebM</span>
+        </button>
+
+        <div class="progress-block hidden" id="progressBlock">
+          <div class="progress-info-row">
+            <span id="progressText" data-i18n="progProcessing">Обработка...</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-stage" id="progressStage"></div>
+        </div>
+
+        <div class="success-block hidden" id="successBlock">
+          <span class="success-icon">✅</span>
+          <div class="success-info">
+            <span class="success-title" data-i18n="successTitle">Файл сохранён!</span>
+            <small class="success-name" id="successName"></small>
+          </div>
+          <button class="btn-sm" id="btnNewFile" data-i18n="btnNewFile">Новый файл</button>
+        </div>
+      </section>
+
+      <!-- ── Шаг 5: CDN Конвертер ── -->
+      <section class="card hidden" id="card5" style="margin-top: 24px;">
+        <header class="card-header">
+          <span class="step-num">05</span>
+          <span class="step-title" data-i18n="step5Title">Хранение и CDN</span>
+        </header>
+
+        <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; font-size: 0.9rem;">
+          <p style="margin-bottom: 12px; color: #ddd;" data-i18n="step5Desc">
+            Загрузи готовый WebM/GIF на свой <a href="https://github.com/" target="_blank" style="color: #fff; font-weight: 600;">GitHub</a> и скопируй ссылку на файл. Вставь её сюда:
+          </p>
+          
+          <input type="text" id="githubInput" placeholder="https://github.com/ZhivchikZer/Foundry/blob/main/..." style="width: 100%; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin-bottom: 16px; font-family: monospace;">
+          
+          <p style="margin-bottom: 8px; color: #aaa;" data-i18n="step5ResultDesc">Вставляй эту ссылку прямо в строку расположения файла в Foundry VTT:</p>
+          
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="cdnOutput" readonly placeholder="Здесь появится прямая ссылка..." style="flex: 1; padding: 10px; background: rgba(124,110,239,0.1); border: 1px solid rgba(124,110,239,0.3); border-radius: 8px; color: #3dd6f5; font-family: monospace; user-select: all;">
+            <button id="btnCopyCdn" class="btn-sm" style="white-space: nowrap;" data-i18n="btnCopy">Копировать</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Модальное окно каталога рамок -->
+  <div id="framesModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div style="background: #1e1e24; padding: 20px; border-radius: 12px; max-width: 1000px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+      <h2 style="margin: 0 0 16px 0; color: #fff;">Каталог рамок (папка Frames)</h2>
+      <div id="framesGrid" style="flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+        <!-- Картинки будут здесь -->
+      </div>
+      <button id="btnCloseFramesModal" class="btn-primary" style="margin-top: 16px;">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="lib/ffmpeg.js"></script>
+  <script src="lib/ffmpeg-util.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
