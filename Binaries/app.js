@@ -1002,9 +1002,10 @@
         S.cropX = S.dragStartCX - diff;
       }
 
-      // Constrain box within video
-      if (S.cropSize > S.naturalW) S.cropSize = S.naturalW;
-      if (S.cropSize > S.naturalH) S.cropSize = S.naturalH;
+      // Constrain box within maximum allowed zoom out (150%)
+      const baseDim = Math.max(S.naturalW, S.naturalH);
+      const maxSize = Math.round(baseDim * 1.5);
+      if (S.cropSize > maxSize) S.cropSize = maxSize;
 
       const minX = Math.min(0, S.naturalW - S.cropSize);
       const maxX = Math.max(0, S.naturalW - S.cropSize);
