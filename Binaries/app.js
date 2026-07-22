@@ -1235,12 +1235,14 @@
               div.appendChild(name);
               
               div.onclick = () => {
+                hide(dom.framesModal); // Сразу прячем окно для быстрого отклика
+                
                 const safeName = encodeURIComponent(f);
                 const url = '/Frames/' + safeName;
-                const tmpImg = new Image();
-                tmpImg.crossOrigin = 'anonymous';
-                tmpImg.onload = () => {
-                  S.frameImg = tmpImg;
+                
+                // Если превью-картинка уже загрузилась, можем использовать её мгновенно
+                if (img.complete && img.naturalWidth > 0) {
+                  S.frameImg = img;
                   S.frameX = 0;
                   S.frameY = 0;
                   S.frameScaleX = 1;
@@ -1252,10 +1254,28 @@
                   dom.frameDropzone.style.borderColor = '#00ff00';
                   show(dom.btnRemoveFrame);
                   dom.frameTransformControls.classList.remove('hidden');
-                  hide(dom.framesModal);
                   drawOverlay();
-                };
-                tmpImg.src = url;
+                } else {
+                  // Иначе грузим через tmpImg
+                  const tmpImg = new Image();
+                  tmpImg.crossOrigin = 'anonymous';
+                  tmpImg.onload = () => {
+                    S.frameImg = tmpImg;
+                    S.frameX = 0;
+                    S.frameY = 0;
+                    S.frameScaleX = 1;
+                    S.frameScaleY = 1;
+                    if (dom.frameScaleRange) dom.frameScaleRange.value = 100;
+                    if (dom.frameScaleLabel) dom.frameScaleLabel.textContent = '100%';
+                    dom.frameNameLabel.textContent = f;
+                    dom.frameNameLabel.style.color = '#fff';
+                    dom.frameDropzone.style.borderColor = '#00ff00';
+                    show(dom.btnRemoveFrame);
+                    dom.frameTransformControls.classList.remove('hidden');
+                    drawOverlay();
+                  };
+                  tmpImg.src = url;
+                }
               };
               dom.framesGrid.appendChild(div);
             });
