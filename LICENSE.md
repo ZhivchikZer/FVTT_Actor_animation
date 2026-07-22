@@ -1,14 +1,14 @@
-# Лицензия на использование (Creative Commons Attribution-NonCommercial 4.0)
+# License (Creative Commons Attribution-NonCommercial 4.0)
 
-Это приложение распространяется по лицензии CC BY-NC 4.0, которая позволяет делиться им со всеми, но строго запрещает использовать его для заработка.
+This application is distributed under the CC BY-NC 4.0 license, which allows sharing it with everyone, but strictly prohibits using it for commercial purposes.
 
-## Вы имеете право:
-- **Делиться (Share)** — копировать и распространять приложение на любом носителе и в любом формате.
-- **Адаптировать (Adapt)** — делать ремиксы, видоизменять, улучшать код и создавать новое на базе этого приложения.
+## You are free to:
+- **Share** — copy and redistribute the material in any medium or format.
+- **Adapt** — remix, transform, and build upon the material.
 
-## При следующих условиях:
-- **Некоммерческое использование (NonCommercial)** — Вы **не имеете права** использовать этот материал в коммерческих целях (нельзя продавать приложение, сдавать его в аренду, закрывать за платный доступ (Patreon/Boosty) или использовать для заработка любым другим способом).
-- **Атрибуция (Attribution)** — Вы должны сохранять указание оригинального авторства при распространении.
+## Under the following terms:
+- **NonCommercial** — You may **not** use the material for commercial purposes (you cannot sell the application, rent it out, put it behind a paywall (like Patreon/Boosty), or use it to generate revenue in any other way).
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
 
 ---
-*Примечание разработчика: Вы упоминали лицензию GNU (например, GNU GPL). На самом деле лицензии семейства GNU **разрешают** коммерческое использование и продажу программ (главное условие GNU — это открытие исходного кода). Так как главной задачей было **запретить заработок** на программе, была выбрана лицензия Creative Commons Non-Commercial (CC BY-NC), которая идеально подходит под ваши требования.*
+*Developer Note: This license was specifically chosen to ensure the application remains free for the community and to explicitly prevent anyone from monetizing the software.*
