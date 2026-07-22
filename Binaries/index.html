@@ -265,10 +265,21 @@
             <!-- Panel: Brush -->
             <div id="panelBrush" class="tab-panel hidden">
               <div id="brushSettings">
-                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                <p style="font-size: 0.8rem; color: #ccc; margin: 0 0 8px 0; text-align: center;">Маска видео</p>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                   <button id="btnBrushErase" class="btn-sm" style="flex: 1; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid #fff;" data-i18n="btnBrushErase">Удалить (Ластик)</button>
                   <button id="btnBrushRestore" class="btn-sm" style="flex: 1; background: rgba(255,0,0,0.3); color: #fff; border: 1px solid transparent;" data-i18n="btnBrushRestore">Вернуть (Кисть)</button>
                 </div>
+
+                <p style="font-size: 0.8rem; color: #ccc; margin: 0 0 8px 0; text-align: center;">Маска рамки (Слои)</p>
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                  <button id="btnBrushBgFrame" class="btn-sm" style="flex: 1; background: rgba(0,255,0,0.3); color: #fff; border: 1px solid transparent;">Отправить назад (Зелёная)</button>
+                  <button id="btnBrushFgFrame" class="btn-sm" style="flex: 1; background: rgba(255,255,0,0.3); color: #fff; border: 1px solid transparent;">Вернуть вперёд (Жёлтая)</button>
+                </div>
+                
+                <p style="font-size: 0.75rem; color: #aaa; margin: 0 0 15px 0; text-align: center; line-height: 1.3;">
+                  💡 <b>Зеленая кисть</b> отправляет часть рамки <b>ЗА видео</b>. Она работает параллельно и не заменяет белую кисть (ластик видео). Чтобы увидеть рамку сзади, на этом месте видео должно быть прозрачным (стерто белой кистью).
+                </p>
                 
                 <div class="size-label-row" style="font-size: 0.8rem;">
                   <span data-i18n="brushSize">Размер</span>

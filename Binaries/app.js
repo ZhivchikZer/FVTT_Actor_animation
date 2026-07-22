@@ -37,6 +37,8 @@
     brushOpacityRange:$('brushOpacityRange'),
     brushOpacityLabel:$('brushOpacityLabel'),
     btnBrushClear: $('btnBrushClear'),
+    btnBrushBgFrame: $('btnBrushBgFrame'),
+    btnBrushFgFrame: $('btnBrushFgFrame'),
     
     // Tabs
     tabVideo:      $('tabVideo'),
@@ -497,6 +499,10 @@
     S.dropCanvas.width = S.naturalW;
     S.dropCanvas.height = S.naturalH;
 
+    S.bgFrameCanvas = document.createElement('canvas');
+    S.bgFrameCanvas.width = S.naturalW;
+    S.bgFrameCanvas.height = S.naturalH;
+
     const baseDim = Math.max(S.naturalW, S.naturalH);
     S.cropSize = baseDim;
     S.cropX = Math.floor((S.naturalW - baseDim) / 2);
@@ -715,6 +721,15 @@
       ctx.globalAlpha = 0.6; // Semi-transparent whitish overlay
       ctx.drawImage(S.dropCanvas, ra.x, ra.y, ra.w, ra.h);
       ctx.restore();
+      
+      // BgFrame strokes: draw green (send frame to back)
+      if (S.bgFrameCanvas && S.bgFrameCanvas.width > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.5; // Semi-transparent green
+        ctx.drawImage(S.bgFrameCanvas, ra.x, ra.y, ra.w, ra.h);
+        ctx.restore();
+      }
     }
 
     // Border
@@ -749,29 +764,44 @@
     const natX = (mx - ra.x) / sx;
     const natY = (my - ra.y) / sy;
     
-    const targetCanvas = S.brushMode === 'restore' ? S.keepCanvas : S.dropCanvas;
-    const otherCanvas  = S.brushMode === 'restore' ? S.dropCanvas : S.keepCanvas;
+    let targetCanvas = null;
+    let otherCanvas = null;
+    let fillColor = '#ffffff';
+    let isEraseMode = false;
+
+    if (S.brushMode === 'restore') { targetCanvas = S.keepCanvas; otherCanvas = S.dropCanvas; fillColor = '#ff0000'; }
+    else if (S.brushMode === 'erase') { targetCanvas = S.dropCanvas; otherCanvas = S.keepCanvas; fillColor = '#ffffff'; }
+    else if (S.brushMode === 'bgFrame') { targetCanvas = S.bgFrameCanvas; fillColor = '#00ff00'; }
+    else if (S.brushMode === 'fgFrame') { targetCanvas = S.bgFrameCanvas; isEraseMode = true; }
+
+    if (!targetCanvas) return;
     
     const ctxTarget = targetCanvas.getContext('2d');
-    const ctxOther  = otherCanvas.getContext('2d');
-    
-    // Scale brush size to native video coordinates
     const natSize = S.brushSize / sx;
     
-    // Draw on target
-    ctxTarget.globalAlpha = S.brushOpacity;
-    ctxTarget.fillStyle = S.brushMode === 'restore' ? '#ff0000' : '#ffffff';
-    ctxTarget.beginPath();
-    ctxTarget.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
-    ctxTarget.fill();
-    ctxTarget.globalAlpha = 1.0;
-    
-    // Erase from the other to prevent conflicts
-    ctxOther.globalCompositeOperation = 'destination-out';
-    ctxOther.beginPath();
-    ctxOther.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
-    ctxOther.fill();
-    ctxOther.globalCompositeOperation = 'source-over';
+    if (isEraseMode) {
+      ctxTarget.globalCompositeOperation = 'destination-out';
+      ctxTarget.beginPath();
+      ctxTarget.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
+      ctxTarget.fill();
+      ctxTarget.globalCompositeOperation = 'source-over';
+    } else {
+      ctxTarget.globalAlpha = S.brushOpacity;
+      ctxTarget.fillStyle = fillColor;
+      ctxTarget.beginPath();
+      ctxTarget.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
+      ctxTarget.fill();
+      ctxTarget.globalAlpha = 1.0;
+      
+      if (otherCanvas) {
+        const ctxOther = otherCanvas.getContext('2d');
+        ctxOther.globalCompositeOperation = 'destination-out';
+        ctxOther.beginPath();
+        ctxOther.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
+        ctxOther.fill();
+        ctxOther.globalCompositeOperation = 'source-over';
+      }
+    }
     
     drawOverlay();
   }
@@ -1336,21 +1366,36 @@
   }
 
   // ─── Brush Mode ────────────────────────────────────────────────────────────
-    dom.btnBrushRestore.addEventListener('click', () => {
-      S.brushMode = 'restore';
-      dom.btnBrushRestore.style.border = '1px solid #fff';
-      dom.btnBrushErase.style.border = 'none';
-      dom.btnBrushRestore.style.background = 'rgba(255,0,0,0.5)';
-      dom.btnBrushErase.style.background = 'rgba(255,255,255,0.2)';
-    });
-
-    dom.btnBrushErase.addEventListener('click', () => {
-      S.brushMode = 'erase';
-      dom.btnBrushErase.style.border = '1px solid #fff';
-      dom.btnBrushRestore.style.border = 'none';
-      dom.btnBrushErase.style.background = 'rgba(255,255,255,0.5)';
+    function updateBrushButtons() {
+      dom.btnBrushRestore.style.border = '1px solid transparent';
+      dom.btnBrushErase.style.border = '1px solid transparent';
+      dom.btnBrushBgFrame.style.border = '1px solid transparent';
+      dom.btnBrushFgFrame.style.border = '1px solid transparent';
+      
       dom.btnBrushRestore.style.background = 'rgba(255,0,0,0.3)';
-    });
+      dom.btnBrushErase.style.background = 'rgba(255,255,255,0.2)';
+      dom.btnBrushBgFrame.style.background = 'rgba(0,255,0,0.3)';
+      dom.btnBrushFgFrame.style.background = 'rgba(255,255,0,0.3)';
+      
+      if (S.brushMode === 'restore') {
+        dom.btnBrushRestore.style.border = '1px solid #fff';
+        dom.btnBrushRestore.style.background = 'rgba(255,0,0,0.5)';
+      } else if (S.brushMode === 'erase') {
+        dom.btnBrushErase.style.border = '1px solid #fff';
+        dom.btnBrushErase.style.background = 'rgba(255,255,255,0.5)';
+      } else if (S.brushMode === 'bgFrame') {
+        dom.btnBrushBgFrame.style.border = '1px solid #fff';
+        dom.btnBrushBgFrame.style.background = 'rgba(0,255,0,0.5)';
+      } else if (S.brushMode === 'fgFrame') {
+        dom.btnBrushFgFrame.style.border = '1px solid #fff';
+        dom.btnBrushFgFrame.style.background = 'rgba(255,255,0,0.5)';
+      }
+    }
+
+    dom.btnBrushRestore.addEventListener('click', () => { S.brushMode = 'restore'; updateBrushButtons(); });
+    dom.btnBrushErase.addEventListener('click', () => { S.brushMode = 'erase'; updateBrushButtons(); });
+    dom.btnBrushBgFrame.addEventListener('click', () => { S.brushMode = 'bgFrame'; updateBrushButtons(); });
+    dom.btnBrushFgFrame.addEventListener('click', () => { S.brushMode = 'fgFrame'; updateBrushButtons(); });
 
     dom.brushSizeRange.addEventListener('input', () => {
       S.brushSize = parseInt(dom.brushSizeRange.value, 10);
@@ -1366,6 +1411,7 @@
       if (S.keepCanvas && S.dropCanvas) {
         S.keepCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         S.dropCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
+        if (S.bgFrameCanvas) S.bgFrameCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         drawOverlay();
       }
     });
@@ -1501,18 +1547,6 @@
       ctx.fillRect(0, 0, s, s);
     }
 
-    // We create a temporary canvas to build the masked video
-    const maskCanvas = document.createElement('canvas');
-    maskCanvas.width = s;
-    maskCanvas.height = s;
-    const mCtx = maskCanvas.getContext('2d');
-
-    // 1. Draw base mask
-    mCtx.fillStyle = '#fff';
-    buildMaskPath(mCtx, S.maskType, 0, 0, s);
-    mCtx.fill();
-
-    // Math for drawing cropped source with safe coordinates (supports >100% zoom)
     const scale = s / S.cropSize;
     const destX = -S.cropX * scale;
     const destY = -S.cropY * scale;
@@ -1520,38 +1554,73 @@
     const destH = S.naturalH * scale;
 
     // Frame Math
-    const fx = S.frameX * scale;
-    const fy = S.frameY * scale;
-    const fw = s * S.frameScaleX;
-    const fh = s * S.frameScaleY;
+    let fX = 0, fY = 0, fW = 0, fH = 0;
+    if (S.frameImg) {
+      const frameScaleOutput = s / S.cropSize;
+      fX = S.frameX * frameScaleOutput;
+      fY = S.frameY * frameScaleOutput;
+      fW = s * S.frameScaleX;
+      fH = s * S.frameScaleY;
 
-    // 2. Add Keep strokes
+      // 1. Draw Background Frame Layer (masked BY bgFrameCanvas)
+      if (S.bgFrameCanvas && S.bgFrameCanvas.width > 0) {
+        const bgCanvas = document.createElement('canvas');
+        bgCanvas.width = s; bgCanvas.height = s;
+        const bgCtx = bgCanvas.getContext('2d');
+        
+        bgCtx.drawImage(S.bgFrameCanvas, destX, destY, destW, destH);
+        bgCtx.globalCompositeOperation = 'source-in';
+        bgCtx.drawImage(S.frameImg, fX, fY, fW, fH);
+        
+        ctx.drawImage(bgCanvas, 0, 0);
+      }
+    }
+
+    // We create a temporary canvas to build the masked video
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = s;
+    maskCanvas.height = s;
+    const mCtx = maskCanvas.getContext('2d');
+
+    // 2. Draw base mask
+    mCtx.fillStyle = '#fff';
+    buildMaskPath(mCtx, S.maskType, 0, 0, s);
+    mCtx.fill();
+
+    // 3. Add Keep strokes
     if (S.keepCanvas && S.keepCanvas.width > 0) {
       mCtx.globalCompositeOperation = 'source-over';
       mCtx.drawImage(S.keepCanvas, destX, destY, destW, destH);
     }
 
-    // 3. Remove Drop strokes
+    // 4. Remove Drop strokes
     if (S.dropCanvas && S.dropCanvas.width > 0) {
       mCtx.globalCompositeOperation = 'destination-out';
       mCtx.drawImage(S.dropCanvas, destX, destY, destW, destH);
     }
 
-    // 4. Source-in the actual video into the mask
+    // 5. Source-in the actual video into the mask
     mCtx.globalCompositeOperation = 'source-in';
     mCtx.drawImage(source, destX, destY, destW, destH);
 
-    // 5. Draw the masked video onto main ctx
+    // 6. Draw the masked video onto main ctx
     ctx.drawImage(maskCanvas, 0, 0);
 
-    // 6. Overlay the static frame if exists
+    // 7. Draw Foreground Frame Layer (excluding bgFrameCanvas)
     if (S.frameImg) {
-      const frameScaleOutput = s / S.cropSize;
-      const fX = S.frameX * frameScaleOutput;
-      const fY = S.frameY * frameScaleOutput;
-      const fW = s * S.frameScaleX;
-      const fH = s * S.frameScaleY;
-      ctx.drawImage(S.frameImg, fX, fY, fW, fH);
+      if (S.bgFrameCanvas && S.bgFrameCanvas.width > 0) {
+        const fgCanvas = document.createElement('canvas');
+        fgCanvas.width = s; fgCanvas.height = s;
+        const fgCtx = fgCanvas.getContext('2d');
+        
+        fgCtx.drawImage(S.frameImg, fX, fY, fW, fH);
+        fgCtx.globalCompositeOperation = 'destination-out';
+        fgCtx.drawImage(S.bgFrameCanvas, destX, destY, destW, destH);
+        
+        ctx.drawImage(fgCanvas, 0, 0);
+      } else {
+        ctx.drawImage(S.frameImg, fX, fY, fW, fH);
+      }
     }
   }
 
