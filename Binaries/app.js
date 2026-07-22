@@ -1016,7 +1016,6 @@
       S.cropY = Math.max(minY, Math.min(maxY, S.cropY));
       
       // Update UI Slider
-      const baseDim = Math.max(S.naturalW, S.naturalH);
       const pct = Math.round((S.cropSize / baseDim) * 100);
       if (dom.cropSizeRange) dom.cropSizeRange.value = pct;
       if (dom.sizeValLabel) dom.sizeValLabel.textContent = pct + '%';
