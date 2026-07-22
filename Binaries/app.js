@@ -2089,17 +2089,12 @@
         
         // Upload to Node Server
         try {
-          const res = await fetch('/upload', {
+          await fetch('/upload', {
             method: 'POST',
             body: blob
           });
-          if (res.ok) {
-            console.log('Video saved to TEST via server');
-          } else {
-            console.warn('Server failed to save video (POST unsupported).');
-          }
         } catch (uploadErr) {
-          console.warn('Could not connect to /upload endpoint');
+          // Игнорируем ошибку, если сервер не поддерживает загрузку
         }
 
         // Forward to the main application
