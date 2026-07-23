@@ -344,6 +344,7 @@
     brushOpacity:  1.0,
     keepCanvas:    null,
     dropCanvas:    null,
+    brushUndoStack: [],
 
     // Background State
     bgTransparent: true,
@@ -806,12 +807,48 @@
     drawOverlay();
   }
 
+  // ─── Undo Logic for Brush ──────────────────────────────────────────────────
+  function saveBrushState() {
+    if (!S.keepCanvas || !S.dropCanvas) return;
+    const state = {};
+    const getCtxData = (canvas) => canvas.getContext('2d').getImageData(0, 0, S.naturalW, S.naturalH);
+    state.keep = getCtxData(S.keepCanvas);
+    state.drop = getCtxData(S.dropCanvas);
+    if (S.bgFrameCanvas) state.bgFrame = getCtxData(S.bgFrameCanvas);
+    
+    if (!S.brushUndoStack) S.brushUndoStack = [];
+    S.brushUndoStack.push(state);
+    if (S.brushUndoStack.length > 20) S.brushUndoStack.shift(); // Max 20 states
+  }
+
+  function undoBrushState() {
+    if (!S.brushUndoStack || S.brushUndoStack.length === 0) return;
+    const state = S.brushUndoStack.pop();
+    const putCtxData = (canvas, data) => {
+      if (canvas && data) canvas.getContext('2d').putImageData(data, 0, 0);
+    };
+    putCtxData(S.keepCanvas, state.keep);
+    putCtxData(S.dropCanvas, state.drop);
+    if (S.bgFrameCanvas) putCtxData(S.bgFrameCanvas, state.bgFrame);
+    drawOverlay();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      if (S.activeTab === 'brush') {
+        undoBrushState();
+        e.preventDefault();
+      }
+    }
+  });
+
   dom.cropCanvas.addEventListener('mousedown', (e) => {
     const rect = dom.cropCanvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     
     if (S.activeTab === 'brush') {
+      saveBrushState();
       S.isBrushing = true;
       paintBrush(mx, my);
       return;
@@ -1429,6 +1466,7 @@
 
     dom.btnBrushClear.addEventListener('click', () => {
       if (S.keepCanvas && S.dropCanvas) {
+        saveBrushState();
         S.keepCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         S.dropCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         if (S.bgFrameCanvas) S.bgFrameCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
