@@ -837,11 +837,18 @@
   function saveBrushState() {
     if (!S.keepCanvas || !S.dropCanvas) return;
     const state = {};
-    const getCtxData = (canvas) => canvas.getContext('2d').getImageData(0, 0, S.naturalW, S.naturalH);
-    state.keep = getCtxData(S.keepCanvas);
-    state.drop = getCtxData(S.dropCanvas);
-    if (S.bgFrameCanvas) state.bgFrame = getCtxData(S.bgFrameCanvas);
-    if (S.chromaCanvas) state.chroma = getCtxData(S.chromaCanvas);
+    const clone = (canvas) => {
+      if (!canvas) return null;
+      const c = document.createElement('canvas');
+      c.width = canvas.width;
+      c.height = canvas.height;
+      c.getContext('2d').drawImage(canvas, 0, 0);
+      return c;
+    };
+    state.keep = clone(S.keepCanvas);
+    state.drop = clone(S.dropCanvas);
+    state.bgFrame = clone(S.bgFrameCanvas);
+    state.chroma = clone(S.chromaCanvas);
     
     if (!S.brushUndoStack) S.brushUndoStack = [];
     S.brushUndoStack.push(state);
@@ -851,13 +858,17 @@
   function undoBrushState() {
     if (!S.brushUndoStack || S.brushUndoStack.length === 0) return;
     const state = S.brushUndoStack.pop();
-    const putCtxData = (canvas, data) => {
-      if (canvas && data) canvas.getContext('2d').putImageData(data, 0, 0);
+    const restore = (canvas, backup) => {
+      if (canvas && backup) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(backup, 0, 0);
+      }
     };
-    putCtxData(S.keepCanvas, state.keep);
-    putCtxData(S.dropCanvas, state.drop);
-    if (S.bgFrameCanvas) putCtxData(S.bgFrameCanvas, state.bgFrame);
-    if (S.chromaCanvas) putCtxData(S.chromaCanvas, state.chroma);
+    restore(S.keepCanvas, state.keep);
+    restore(S.dropCanvas, state.drop);
+    restore(S.bgFrameCanvas, state.bgFrame);
+    restore(S.chromaCanvas, state.chroma);
     drawOverlay();
   }
 
