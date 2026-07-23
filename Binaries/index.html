@@ -151,8 +151,8 @@
           <span class="step-title" data-i18n="step2Title">Кадрирование 1×1</span>
         </header>
 
-        <div class="crop-layout" style="flex-direction: column; align-items: center; gap: 24px;">
-          <div class="video-area" style="width: 100%; max-width: 600px;">
+        <div class="crop-layout" style="display: flex; flex-direction: column; align-items: center; gap: 24px;">
+          <div class="video-area" style="width: 100%; max-width: 800px;">
             <div class="video-wrap" id="videoWrap">
               <video id="vid" muted loop playsinline autoplay></video>
               <canvas id="cropCanvas"></canvas>
@@ -160,15 +160,9 @@
             <p class="hint-text" style="text-align: center;">💡 <span id="modeHintText" data-i18n="hintDrag">Тяни рамку чтобы позиционировать персонажа</span></p>
           </div>
 
-          <!-- Preview Area -->
-          <div class="preview-area" style="margin-top: 0; width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center;">
-            <p class="preview-label" style="text-align: center; margin-bottom: 12px;" data-i18n="previewLabel">Итоговый токен</p>
-            <div class="preview-holder" style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px;">
-              <canvas id="previewCanvas" width="180" height="180"></canvas>
-            </div>
-          </div>
-
-          <div class="editor-controls" style="width: 100%; max-width: 600px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px;">
+          <div class="bottom-controls-row" style="display: flex; width: 100%; max-width: 1000px; gap: 24px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
+            
+            <div class="editor-controls" style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px;">
             <!-- Tabs -->
             <div class="editor-tabs" style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
               <button id="tabVideo" class="tab-btn active" style="flex: 1; padding: 8px; border: none; background: rgba(124,110,239,0.3); color: #fff; border-radius: 6px; cursor: pointer; transition: 0.2s;" data-i18n="tabVideo">🎥 Видео и Фон</button>
@@ -315,6 +309,15 @@
               </div>
             </div>
           </div>
+          
+          <!-- Preview Area moved here -->
+          <div class="preview-area" style="flex: 0 0 220px; display: flex; flex-direction: column; align-items: center;">
+            <p class="preview-label" style="text-align: center; margin-bottom: 12px;" data-i18n="previewLabel">Итоговый токен</p>
+            <div class="preview-holder" style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; width: 100%; display: flex; justify-content: center;">
+              <canvas id="previewCanvas" width="180" height="180" style="max-width: 100%; height: auto;"></canvas>
+            </div>
+          </div>
+
         </div>
       </section>
 
