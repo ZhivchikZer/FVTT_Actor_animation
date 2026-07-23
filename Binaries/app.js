@@ -684,12 +684,12 @@
     ctx.stroke();
     ctx.restore();
 
-    // 3. Draw frame overlay preview if in frame tab
-    if ((S.activeTab === 'frame' || S.activeTab === 'video') && S.frameImg) {
+    // 3. Draw frame overlay preview
+    if (S.frameImg) {
       ctx.save();
       const sx = size / S.cropSize;
       const sy = size / S.cropSize;
-      ctx.globalAlpha = 0.6;
+      ctx.globalAlpha = S.activeTab === 'brush' ? 0.25 : 0.6;
       
       const fx = x + S.frameX * sx;
       const fy = y + S.frameY * sy;
