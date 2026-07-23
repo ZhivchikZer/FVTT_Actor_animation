@@ -30,15 +30,21 @@
     sizeValLabel:  $('sizeValLabel'),
     brushToggle:   $('brushToggle'),
     brushSettings: $('brushSettings'),
-    btnBrushErase: $('btnBrushErase'),
-    btnBrushRestore:$('btnBrushRestore'),
+    btnBrushErase:   document.getElementById('btnBrushErase'),
+    btnBrushRestore: $('btnBrushRestore'),
+    btnBrushBgFrame: document.getElementById('btnBrushBgFrame'),
+    btnBrushFgFrame: document.getElementById('btnBrushFgFrame'),
+    btnBrushChroma:  document.getElementById('btnBrushChroma'),
+    btnBrushChromaErase: document.getElementById('btnBrushChromaErase'),
+    btnBrushClear:   document.getElementById('btnBrushClear'),
+    btnEyedropper:   document.getElementById('btnEyedropper'),
+    chromaColorSwatch: document.getElementById('chromaColorSwatch'),
+    chromaToleranceRange: document.getElementById('chromaToleranceRange'),
+    chromaToleranceLabel: document.getElementById('chromaToleranceLabel'),
     brushSizeRange:$('brushSizeRange'),
     brushSizeLabel:$('brushSizeLabel'),
     brushOpacityRange:$('brushOpacityRange'),
     brushOpacityLabel:$('brushOpacityLabel'),
-    btnBrushClear: $('btnBrushClear'),
-    btnBrushBgFrame: $('btnBrushBgFrame'),
-    btnBrushFgFrame: $('btnBrushFgFrame'),
     
     // Tabs
     tabVideo:      $('tabVideo'),
@@ -344,6 +350,11 @@
     brushOpacity:  1.0,
     keepCanvas:    null,
     dropCanvas:    null,
+    bgFrameCanvas: null,
+    chromaCanvas:  null,
+    chromaColor:   {r:0, g:0, b:0},
+    chromaTolerance: 0.2,
+    isPickingColor: false,
     brushUndoStack: [],
 
     // Background State
@@ -503,6 +514,10 @@
     S.bgFrameCanvas = document.createElement('canvas');
     S.bgFrameCanvas.width = S.naturalW;
     S.bgFrameCanvas.height = S.naturalH;
+    
+    S.chromaCanvas = document.createElement('canvas');
+    S.chromaCanvas.width = S.naturalW;
+    S.chromaCanvas.height = S.naturalH;
 
     const baseDim = Math.max(S.naturalW, S.naturalH);
     S.cropSize = baseDim;
@@ -731,6 +746,15 @@
         ctx.drawImage(S.bgFrameCanvas, ra.x, ra.y, ra.w, ra.h);
         ctx.restore();
       }
+      
+      // Chroma stroke visual overlay (Brown)
+      if (S.chromaCanvas && S.chromaCanvas.width > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.6; // Semi-transparent brown
+        ctx.drawImage(S.chromaCanvas, ra.x, ra.y, ra.w, ra.h);
+        ctx.restore();
+      }
     }
 
     // Border
@@ -774,6 +798,8 @@
     else if (S.brushMode === 'erase') { targetCanvas = S.dropCanvas; otherCanvas = S.keepCanvas; fillColor = '#ffffff'; }
     else if (S.brushMode === 'bgFrame') { targetCanvas = S.bgFrameCanvas; fillColor = '#00ff00'; }
     else if (S.brushMode === 'fgFrame') { targetCanvas = S.bgFrameCanvas; isEraseMode = true; }
+    else if (S.brushMode === 'chroma') { targetCanvas = S.chromaCanvas; fillColor = '#8B4513'; } // Brown
+    else if (S.brushMode === 'chromaErase') { targetCanvas = S.chromaCanvas; isEraseMode = true; }
 
     if (!targetCanvas) return;
     
@@ -815,6 +841,7 @@
     state.keep = getCtxData(S.keepCanvas);
     state.drop = getCtxData(S.dropCanvas);
     if (S.bgFrameCanvas) state.bgFrame = getCtxData(S.bgFrameCanvas);
+    if (S.chromaCanvas) state.chroma = getCtxData(S.chromaCanvas);
     
     if (!S.brushUndoStack) S.brushUndoStack = [];
     S.brushUndoStack.push(state);
@@ -830,6 +857,7 @@
     putCtxData(S.keepCanvas, state.keep);
     putCtxData(S.dropCanvas, state.drop);
     if (S.bgFrameCanvas) putCtxData(S.bgFrameCanvas, state.bgFrame);
+    if (S.chromaCanvas) putCtxData(S.chromaCanvas, state.chroma);
     drawOverlay();
   }
 
@@ -855,6 +883,31 @@
     }
 
     const { x, y, size } = getCropDisplay();
+    
+    // Eyedropper logic
+    if (S.isPickingColor) {
+      const rx = (mx - x) * (S.cropSize / size);
+      const ry = (my - y) * (S.cropSize / size);
+      
+      const realX = S.cropX + rx;
+      const realY = S.cropY + ry;
+      
+      // Temporary canvas to grab exact pixel from video
+      const tmpC = document.createElement('canvas');
+      tmpC.width = 1; tmpC.height = 1;
+      const tmpCtx = tmpC.getContext('2d');
+      tmpCtx.drawImage(dom.vid, -realX, -realY, S.naturalW, S.naturalH);
+      const p = tmpCtx.getImageData(0,0,1,1).data;
+      
+      S.chromaColor = {r: p[0], g: p[1], b: p[2]};
+      if (dom.chromaColorSwatch) {
+        dom.chromaColorSwatch.style.background = `rgb(${p[0]}, ${p[1]}, ${p[2]})`;
+      }
+      S.isPickingColor = false;
+      dom.btnEyedropper.style.background = '#444';
+      drawOverlay();
+      return;
+    }
     
     // Check resize handles first (pad by 10px for easier grabbing)
     const hitR = 12;
@@ -1468,7 +1521,20 @@
         dom.btnBrushBgFrame.style.background = 'rgba(0,255,0,0.5)';
       } else if (S.brushMode === 'fgFrame') {
         dom.btnBrushFgFrame.style.border = '1px solid #fff';
-        dom.btnBrushFgFrame.style.background = 'rgba(255,255,0,0.5)';
+        if (dom.btnBrushFgFrame) {
+          dom.btnBrushFgFrame.style.border = '1px solid #ffff00';
+          dom.btnBrushFgFrame.style.background = 'rgba(255,255,0,0.3)';
+        }
+      } else if (S.brushMode === 'chroma') {
+        if (dom.btnBrushChroma) {
+          dom.btnBrushChroma.style.border = '1px solid #8B4513';
+          dom.btnBrushChroma.style.background = 'rgba(139,69,19,0.5)';
+        }
+      } else if (S.brushMode === 'chromaErase') {
+        if (dom.btnBrushChromaErase) {
+          dom.btnBrushChromaErase.style.border = '1px solid #fff';
+          dom.btnBrushChromaErase.style.background = 'rgba(255,255,255,0.2)';
+        }
       }
     }
 
@@ -1476,6 +1542,37 @@
     dom.btnBrushErase.addEventListener('click', () => { S.brushMode = 'erase'; updateBrushButtons(); });
     dom.btnBrushBgFrame.addEventListener('click', () => { S.brushMode = 'bgFrame'; updateBrushButtons(); });
     dom.btnBrushFgFrame.addEventListener('click', () => { S.brushMode = 'fgFrame'; updateBrushButtons(); });
+
+    if (dom.btnBrushChroma) {
+      dom.btnBrushChroma.addEventListener('click', () => {
+        S.brushMode = 'chroma';
+        updateBrushButtons();
+      });
+    }
+
+    if (dom.btnBrushChromaErase) {
+      dom.btnBrushChromaErase.addEventListener('click', () => {
+        S.brushMode = 'chromaErase';
+        updateBrushButtons();
+      });
+    }
+
+    if (dom.btnEyedropper) {
+      dom.btnEyedropper.addEventListener('click', () => {
+        S.isPickingColor = true;
+        dom.btnEyedropper.style.background = '#8B4513';
+        dom.tabVideo.click(); // Switch to video tab to click on the raw video
+        alert("Пипетка активна! Кликните по видео, чтобы выбрать цвет для удаления.");
+      });
+    }
+
+    if (dom.chromaToleranceRange) {
+      dom.chromaToleranceRange.addEventListener('input', () => {
+        S.chromaTolerance = dom.chromaToleranceRange.value / 100;
+        dom.chromaToleranceLabel.textContent = dom.chromaToleranceRange.value + '%';
+        drawOverlay();
+      });
+    }
 
     dom.brushSizeRange.addEventListener('input', () => {
       S.brushSize = parseInt(dom.brushSizeRange.value, 10);
@@ -1493,6 +1590,7 @@
         S.keepCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         S.dropCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         if (S.bgFrameCanvas) S.bgFrameCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
+        if (S.chromaCanvas) S.chromaCanvas.getContext('2d').clearRect(0, 0, S.naturalW, S.naturalH);
         drawOverlay();
       }
     });
@@ -1683,6 +1781,44 @@
     // 5. Source-in the actual video into the mask
     mCtx.globalCompositeOperation = 'source-in';
     mCtx.drawImage(source, destX, destY, destW, destH);
+
+    // 5.5 Chroma Key Processing
+    if (S.chromaCanvas && S.chromaCanvas.width > 0) {
+      const cMaskCanvas = document.createElement('canvas');
+      cMaskCanvas.width = s; cMaskCanvas.height = s;
+      const cMaskCtx = cMaskCanvas.getContext('2d');
+      cMaskCtx.drawImage(S.chromaCanvas, destX, destY, destW, destH);
+      
+      const vData = mCtx.getImageData(0, 0, s, s);
+      const cData = cMaskCtx.getImageData(0, 0, s, s);
+      
+      const pxVideo = vData.data;
+      const pxMask  = cData.data;
+      
+      const tr = S.chromaColor.r;
+      const tg = S.chromaColor.g;
+      const tb = S.chromaColor.b;
+      const tol = S.chromaTolerance * 441.67; // sqrt(255^2 * 3)
+      
+      let modified = false;
+      for (let i = 0; i < pxVideo.length; i += 4) {
+        if (pxVideo[i + 3] > 0 && pxMask[i + 3] > 0) {
+          const r = pxVideo[i];
+          const g = pxVideo[i + 1];
+          const b = pxVideo[i + 2];
+          
+          const dist = Math.sqrt((r-tr)**2 + (g-tg)**2 + (b-tb)**2);
+          if (dist <= tol) {
+            pxVideo[i + 3] = 0;
+            modified = true;
+          }
+        }
+      }
+      
+      if (modified) {
+        mCtx.putImageData(vData, 0, 0);
+      }
+    }
 
     // 6. Draw the masked video onto main ctx
     ctx.drawImage(maskCanvas, 0, 0);

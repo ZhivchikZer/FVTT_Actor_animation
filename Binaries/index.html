@@ -280,6 +280,24 @@
                 <p style="font-size: 0.75rem; color: #aaa; margin: 0 0 15px 0; text-align: center; line-height: 1.3;">
                   💡 <b>Зеленая кисть</b> отправляет часть рамки <b>ЗА видео</b>. Она работает параллельно и не заменяет белую кисть (ластик видео). Чтобы увидеть рамку сзади, на этом месте видео должно быть прозрачным (стерто белой кистью).
                 </p>
+
+                <p style="font-size: 0.8rem; color: #ccc; margin: 0 0 8px 0; text-align: center;">Динамический хромакей (Удаление цвета)</p>
+                <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                  <button id="btnBrushChroma" class="btn-sm" style="flex: 1; background: rgba(139,69,19,0.3); color: #fff; border: 1px solid transparent;">Коричневая кисть</button>
+                  <button id="btnBrushChromaErase" class="btn-sm" style="flex: 1; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid transparent;">Ластик хромакея</button>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+                  <button id="btnEyedropper" class="btn-sm" style="padding: 4px 8px; background: #444;" title="Выбрать цвет кликом по видео">💧 Пипетка</button>
+                  <div id="chromaColorSwatch" style="width: 24px; height: 24px; border-radius: 4px; background: #000; border: 1px solid #fff;"></div>
+                  <div style="flex: 1;">
+                    <div class="size-label-row" style="font-size: 0.75rem; margin-bottom: 4px;">
+                      <span>Допуск</span>
+                      <span id="chromaToleranceLabel">20%</span>
+                    </div>
+                    <input type="range" class="range-input" id="chromaToleranceRange" min="0" max="100" value="20">
+                  </div>
+                </div>
                 
                 <div class="size-label-row" style="font-size: 0.8rem;">
                   <span data-i18n="brushSize">Размер</span>
