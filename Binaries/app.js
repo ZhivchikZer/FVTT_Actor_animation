@@ -875,13 +875,6 @@
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     
-    if (S.activeTab === 'brush') {
-      saveBrushState();
-      S.isBrushing = true;
-      paintBrush(mx, my);
-      return;
-    }
-
     const { x, y, size } = getCropDisplay();
     
     // Eyedropper logic
@@ -906,6 +899,13 @@
       S.isPickingColor = false;
       dom.btnEyedropper.style.background = '#444';
       drawOverlay();
+      return;
+    }
+
+    if (S.activeTab === 'brush') {
+      saveBrushState();
+      S.isBrushing = true;
+      paintBrush(mx, my);
       return;
     }
     
@@ -1561,7 +1561,6 @@
       dom.btnEyedropper.addEventListener('click', () => {
         S.isPickingColor = true;
         dom.btnEyedropper.style.background = '#8B4513';
-        dom.tabVideo.click(); // Switch to video tab to click on the raw video
         alert("Пипетка активна! Кликните по видео, чтобы выбрать цвет для удаления.");
       });
     }
