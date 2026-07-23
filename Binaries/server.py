@@ -47,8 +47,18 @@ class CustomHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 return
 
-        return super().do_GET()
+        if urlPath == '/' or urlPath == '/index.html':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
+            self.end_headers()
+            with open(os.path.join(os.path.dirname(__file__), 'index.html'), 'rb') as f:
+                self.wfile.write(f.read())
+            return
 
+        super().do_GET()
     def do_POST(self):
         parsed = urlparse(self.path)
         if parsed.path == '/upload':
