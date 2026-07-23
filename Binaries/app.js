@@ -1234,9 +1234,32 @@
     if (dom.btnDefaultFrames) {
       dom.btnDefaultFrames.addEventListener('click', async () => {
         try {
-          const res = await fetch('/api/frames');
-          if (!res.ok) throw new Error('Network error');
-          const files = await res.json();
+          let files = [];
+          try {
+            const res = await fetch('/api/frames');
+            if (res.ok) {
+              files = await res.json();
+            } else {
+              throw new Error('API not ok');
+            }
+          } catch (e) {
+            console.warn('API /api/frames failed, trying /Frames/ directory parsing...', e);
+            const res2 = await fetch('/Frames/');
+            if (!res2.ok) throw new Error('Cannot read Frames directory');
+            const html = await res2.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const links = Array.from(doc.querySelectorAll('a'));
+            files = links
+              .map(a => {
+                let href = a.getAttribute('href');
+                if (href) href = decodeURIComponent(href);
+                return href;
+              })
+              .filter(href => href && (href.toLowerCase().endsWith('.png') || href.toLowerCase().endsWith('.webp')));
+            files = files.map(f => f.replace(/\/Frames\//g, '').replace(/Frames\//g, '').split('/').pop());
+          }
+          
           dom.framesGrid.innerHTML = '';
           if (files.length === 0) {
             dom.framesGrid.innerHTML = '<p style="color: #aaa; grid-column: 1/-1;">Папка Frames пуста или не найдена.</p>';

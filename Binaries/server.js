@@ -21,6 +21,7 @@ const MIME = {
 
 http.createServer((req, res) => {
   let urlPath = req.url.split('?')[0];
+  try { urlPath = decodeURIComponent(urlPath); } catch(e) {}
   if (urlPath === '/') urlPath = '/index.html';
 
   if (req.method === 'POST' && urlPath === '/upload') {
