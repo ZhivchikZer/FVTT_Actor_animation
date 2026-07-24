@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
   <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
 </head>
 <body>
@@ -152,7 +152,7 @@
         </header>
 
         <div class="crop-layout" style="display: flex; flex-direction: column; align-items: center; gap: 24px;">
-          <div class="video-area" style="width: 100%; max-width: 800px;">
+          <div class="video-area" style="order: 2; width: 100%; max-width: 800px;">
             <div class="video-wrap" id="videoWrap">
               <video id="vid" muted loop playsinline autoplay></video>
               <canvas id="cropCanvas"></canvas>
@@ -160,7 +160,7 @@
             <p class="hint-text" style="text-align: center;">💡 <span id="modeHintText" data-i18n="hintDrag">Тяни рамку чтобы позиционировать персонажа</span></p>
           </div>
 
-          <div class="bottom-controls-row" style="display: flex; width: 100%; max-width: 1100px; gap: 24px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
+          <div class="bottom-controls-row" style="order: 1; display: flex; width: 100%; max-width: 1100px; gap: 24px; align-items: flex-start; justify-content: center; flex-wrap: wrap;">
             
             <div class="editor-controls" style="flex: 1; min-width: 420px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px;">
             <!-- Tabs -->
@@ -496,7 +496,7 @@
 
   <script src="lib/ffmpeg.js"></script>
   <script src="lib/ffmpeg-util.js"></script>
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 
 </body>
 </html>

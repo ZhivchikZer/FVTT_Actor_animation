@@ -811,9 +811,11 @@
     
     if (isEraseMode) {
       ctxTarget.globalCompositeOperation = 'destination-out';
+      ctxTarget.globalAlpha = S.brushOpacity;
       ctxTarget.beginPath();
       ctxTarget.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
       ctxTarget.fill();
+      ctxTarget.globalAlpha = 1.0;
       ctxTarget.globalCompositeOperation = 'source-over';
     } else {
       ctxTarget.globalAlpha = S.brushOpacity;
@@ -826,9 +828,11 @@
       if (otherCanvas) {
         const ctxOther = otherCanvas.getContext('2d');
         ctxOther.globalCompositeOperation = 'destination-out';
+        ctxOther.globalAlpha = S.brushOpacity;
         ctxOther.beginPath();
         ctxOther.arc(natX, natY, natSize / 2, 0, Math.PI * 2);
         ctxOther.fill();
+        ctxOther.globalAlpha = 1.0;
         ctxOther.globalCompositeOperation = 'source-over';
       }
     }
