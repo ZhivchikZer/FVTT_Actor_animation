@@ -1656,7 +1656,7 @@
     if (!S.videoReady || !dom.vid.duration) return;
     const duration = dom.vid.duration / S.speed;
     // Base bitrate logic
-    let bitrateKbps = 1500; // Base for 512x512 30FPS medium
+    let bitrateKbps = 850; // Base for 512x512 30FPS medium
     
     // Scale by size
     const sizeMultiplier = Math.pow(S.outputSize / 512, 2);
