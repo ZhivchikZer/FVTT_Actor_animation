@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
 </head>
 <body>
@@ -73,6 +73,9 @@
 
           <div style="padding: 16px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
             <p style="margin-bottom: 12px; font-size: 0.95rem; color: #ccc; text-align: center;">Если у тебя уже есть видео, выбери его, чтобы вырезать нужный фрагмент (желательно от 4 до 8 секунд). Так можно играть вообще за кого угодно, если подловить момент в сцене/игре/аниме.</p>
+            <p style="margin-bottom: 16px; font-size: 0.85rem; color: #ffd700; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+              💡 <b>Лайфхак для ИИ-видео:</b> Если сырое видео дёргается или лагает при экспорте, просто прогони его здесь без изменений (кнопка "Вырезать"). Встроенный FFmpeg исправит структуру кадров, стандартизирует файл под эту утилиту, и лаги полностью исчезнут!
+            </p>
             <div style="text-align: center; margin-bottom: 16px;">
               <button class="btn-primary" id="btnSelectTrimVideo" style="font-size: 0.9rem; padding: 8px 16px;">📂 Выбрать видео для обрезки</button>
               <input type="file" id="trimInput" accept="video/*" hidden>
@@ -496,7 +499,7 @@
 
   <script src="lib/ffmpeg.js"></script>
   <script src="lib/ffmpeg-util.js"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 
 </body>
 </html>
