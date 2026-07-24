@@ -48,7 +48,7 @@ echo [Server] http://localhost:3000
 echo [Server] Stop: Ctrl+C or close this window
 echo.
 
-start http://localhost:3000/?v=11
+start http://localhost:3000/?v=12
 
 python --version >nul 2>&1
 if %errorlevel% equ 0 (

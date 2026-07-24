@@ -692,7 +692,7 @@
       ctx.save();
       const sx = size / S.cropSize;
       const sy = size / S.cropSize;
-      ctx.globalAlpha = S.activeTab === 'brush' ? 0.25 : 0.6;
+      ctx.globalAlpha = S.activeTab === 'brush' ? 0.45 : 0.85;
       
       const fx = x + S.frameX * sx;
       const fy = y + S.frameY * sy;
@@ -727,7 +727,7 @@
       ctx.drawImage(S.keepCanvas, ra.x, ra.y, ra.w, ra.h);
       ctx.restore();
       
-      // Keep strokes: tint red
+      // Keep strokes: tint blue
       ctx.save();
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 0.3;
@@ -797,7 +797,7 @@
     let fillColor = '#ffffff';
     let isEraseMode = false;
 
-    if (S.brushMode === 'restore') { targetCanvas = S.keepCanvas; otherCanvas = S.dropCanvas; fillColor = '#ff0000'; }
+    if (S.brushMode === 'restore') { targetCanvas = S.keepCanvas; otherCanvas = S.dropCanvas; fillColor = '#0000ff'; }
     else if (S.brushMode === 'erase') { targetCanvas = S.dropCanvas; otherCanvas = S.keepCanvas; fillColor = '#ffffff'; }
     else if (S.brushMode === 'bgFrame') { targetCanvas = S.bgFrameCanvas; fillColor = '#00ff00'; }
     else if (S.brushMode === 'fgFrame') { targetCanvas = S.bgFrameCanvas; isEraseMode = true; }
@@ -1519,14 +1519,14 @@
       dom.btnBrushBgFrame.style.border = '1px solid transparent';
       dom.btnBrushFgFrame.style.border = '1px solid transparent';
       
-      dom.btnBrushRestore.style.background = 'rgba(255,0,0,0.3)';
+      dom.btnBrushRestore.style.background = 'rgba(0,0,255,0.3)';
       dom.btnBrushErase.style.background = 'rgba(255,255,255,0.2)';
       dom.btnBrushBgFrame.style.background = 'rgba(0,255,0,0.3)';
-      dom.btnBrushFgFrame.style.background = 'rgba(255,255,0,0.3)';
+      dom.btnBrushFgFrame.style.background = 'rgba(255,0,0,0.3)';
       
       if (S.brushMode === 'restore') {
         dom.btnBrushRestore.style.border = '1px solid #fff';
-        dom.btnBrushRestore.style.background = 'rgba(255,0,0,0.5)';
+        dom.btnBrushRestore.style.background = 'rgba(0,0,255,0.5)';
       } else if (S.brushMode === 'erase') {
         dom.btnBrushErase.style.border = '1px solid #fff';
         dom.btnBrushErase.style.background = 'rgba(255,255,255,0.5)';
@@ -1536,8 +1536,8 @@
       } else if (S.brushMode === 'fgFrame') {
         dom.btnBrushFgFrame.style.border = '1px solid #fff';
         if (dom.btnBrushFgFrame) {
-          dom.btnBrushFgFrame.style.border = '1px solid #ffff00';
-          dom.btnBrushFgFrame.style.background = 'rgba(255,255,0,0.3)';
+          dom.btnBrushFgFrame.style.border = '1px solid #ff0000';
+          dom.btnBrushFgFrame.style.background = 'rgba(255,0,0,0.5)';
         }
       } else if (S.brushMode === 'chroma') {
         if (dom.btnBrushChroma) {
