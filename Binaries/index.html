@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
   <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
 </head>
 <body>
@@ -284,12 +284,21 @@
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
                   <button id="btnEyedropper" class="btn-sm" style="padding: 4px 8px; background: #444;" title="Выбрать цвет кликом по видео">💧 Пипетка</button>
                   <div id="chromaColorSwatch" style="width: 24px; height: 24px; border-radius: 4px; background: #000; border: 1px solid #fff;"></div>
-                  <div style="flex: 1;">
-                    <div class="size-label-row" style="font-size: 0.75rem; margin-bottom: 4px;">
-                      <span>Допуск</span>
-                      <span id="chromaToleranceLabel">20%</span>
+                  <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                    <div>
+                      <div class="size-label-row" style="font-size: 0.75rem; margin-bottom: 4px;">
+                        <span>Допуск</span>
+                        <span id="chromaToleranceLabel">20%</span>
+                      </div>
+                      <input type="range" class="range-input" id="chromaToleranceRange" min="0" max="100" value="20">
                     </div>
-                    <input type="range" class="range-input" id="chromaToleranceRange" min="0" max="100" value="20">
+                    <div>
+                      <div class="size-label-row" style="font-size: 0.75rem; margin-bottom: 4px;">
+                        <span>Сглаживание</span>
+                        <span id="chromaSmoothingLabel">10%</span>
+                      </div>
+                      <input type="range" class="range-input" id="chromaSmoothingRange" min="0" max="100" value="10">
+                    </div>
                   </div>
                 </div>
                 
@@ -487,7 +496,7 @@
 
   <script src="lib/ffmpeg.js"></script>
   <script src="lib/ffmpeg-util.js"></script>
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 
 </body>
 </html>

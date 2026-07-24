@@ -41,6 +41,8 @@
     chromaColorSwatch: document.getElementById('chromaColorSwatch'),
     chromaToleranceRange: document.getElementById('chromaToleranceRange'),
     chromaToleranceLabel: document.getElementById('chromaToleranceLabel'),
+    chromaSmoothingRange: document.getElementById('chromaSmoothingRange'),
+    chromaSmoothingLabel: document.getElementById('chromaSmoothingLabel'),
     brushSizeRange:$('brushSizeRange'),
     brushSizeLabel:$('brushSizeLabel'),
     brushOpacityRange:$('brushOpacityRange'),
@@ -354,6 +356,7 @@
     chromaCanvas:  null,
     chromaColor:   {r:0, g:0, b:0},
     chromaTolerance: 0.2,
+    chromaSmoothing: 0.1,
     isPickingColor: false,
     brushUndoStack: [],
 
@@ -1584,6 +1587,14 @@
       });
     }
 
+    if (dom.chromaSmoothingRange) {
+      dom.chromaSmoothingRange.addEventListener('input', () => {
+        S.chromaSmoothing = dom.chromaSmoothingRange.value / 100;
+        dom.chromaSmoothingLabel.textContent = dom.chromaSmoothingRange.value + '%';
+        drawOverlay();
+      });
+    }
+
     dom.brushSizeRange.addEventListener('input', () => {
       S.brushSize = parseInt(dom.brushSizeRange.value, 10);
       dom.brushSizeLabel.textContent = S.brushSize;
@@ -1809,6 +1820,7 @@
       const tg = S.chromaColor.g;
       const tb = S.chromaColor.b;
       const tol = S.chromaTolerance * 441.67; // sqrt(255^2 * 3)
+      const smooth = S.chromaSmoothing * 441.67;
       
       let modified = false;
       for (let i = 0; i < pxVideo.length; i += 4) {
@@ -1821,6 +1833,14 @@
           if (dist <= tol) {
             pxVideo[i + 3] = 0;
             modified = true;
+          } else if (smooth > 0 && dist <= tol + smooth) {
+            const fraction = (dist - tol) / smooth;
+            const originalAlpha = pxVideo[i + 3];
+            const newAlpha = Math.round(originalAlpha * fraction);
+            if (newAlpha !== originalAlpha) {
+              pxVideo[i + 3] = newAlpha;
+              modified = true;
+            }
           }
         }
       }
